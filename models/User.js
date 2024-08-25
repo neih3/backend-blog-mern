@@ -14,6 +14,9 @@ const userSchema = new mongoose.Schema({
     required: [true, "please enter an password"],
     minlength: [6, "Minimum password length is 6 cha"],
   },
+  refreshToken: {
+    type: String,
+  },
 });
 
 // fire a func after doc saved to db
@@ -35,7 +38,7 @@ userSchema.statics.login = async function (email, password) {
   const user = await this.findOne({ email });
 
   if (user) {
-    const auth = bcrypt.compareSync(password, user.password);
+    const auth = bcrypt.compare(password, user.password);
     if (auth) {
       return user;
     }

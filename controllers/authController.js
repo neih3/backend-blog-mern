@@ -1,5 +1,54 @@
+const { generateToken, verifyToken } = require("../helpers/jwt.helpers");
 const User = require("../models/User");
-const jwt = require("jsonwebtoken");
+
+module.exports.refreshToken = async (req, res) => {
+  const refreshTokenFromClient = req.body.refreshToken;
+
+  if (!refreshTokenFromClient) {
+    return res.status(403).json({
+      message: "No refresh token provided.",
+    });
+  }
+
+  try {
+    // Verify and decode the refresh token
+    const decoded = await verifyToken(refreshTokenFromClient, "hien");
+    const { email } = decoded.data;
+
+    // Find the user with the given email and refresh token
+    const user = await User.findOne({
+      email,
+      refreshToken: refreshTokenFromClient,
+    });
+
+    if (!user) {
+      return res.status(403).json({
+        message: "Invalid refresh token.",
+      });
+    }
+
+    // Generate new access token
+    const accessToken = await generateToken({ email }, "hien", "1h");
+
+    // Generate new refresh token
+    const newRefreshToken = await generateToken({ email }, "hien", "3650d");
+
+    // Update user's refresh token in the database
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    // Send new tokens to the client
+    res.status(200).json({
+      accessToken,
+      refreshToken: newRefreshToken,
+    });
+  } catch (error) {
+    console.error("Refresh token error:", error);
+    res.status(403).json({
+      message: "Invalid refresh token.",
+    });
+  }
+};
 
 const handleErrors = (err) => {
   // console.log(err.code);
@@ -31,29 +80,24 @@ const handleErrors = (err) => {
   return errors;
 };
 
-const maxAge = 3 * 24 * 60 * 60;
-const createToken = (id) => {
-  return jwt.sign({ id }, "hien", {
-    expiresIn: maxAge,
-  });
-};
-
-module.exports.signup_get = (req, res) => {
-  res.render("signup");
-};
-
-module.exports.login_get = (req, res) => {
-  res.render("login");
-};
-
 module.exports.signup_post = async (req, res) => {
   const { email, password } = req.body;
 
   try {
     const user = await User.create({ email, password });
-    const token = createToken(user._id);
-    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(201).json({ user: user._id });
+    const accessToken = await generateToken({ email, password }, "hien", "1h");
+    const refreshToken = await generateToken(
+      { email, password },
+      "hien",
+      "3650d"
+    );
+    user.refreshToken = refreshToken;
+    await user.save();
+    res.status(201).json({
+      user: user,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    });
   } catch (err) {
     const errors = handleErrors(err);
     res.status(400).json({ errors });
@@ -65,16 +109,22 @@ module.exports.login_post = async (req, res) => {
 
   try {
     const user = await User.login(email, password);
-    const token = createToken(user._id);
-    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(200).json({ user: user._id });
+    const accessToken = await generateToken({ email, password }, "hien", "1h");
+    const refreshToken = await generateToken(
+      { email, password },
+      "hien",
+      "3650d"
+    );
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    res.status(201).json({
+      user: user,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    });
   } catch (err) {
     const errors = handleErrors(err);
     res.status(400).json({ errors });
   }
-};
-
-module.exports.logout_get = (req, res) => {
-  res.cookie("jwt", "", { maxAge: 1 });
-  res.redirect("/");
 };
