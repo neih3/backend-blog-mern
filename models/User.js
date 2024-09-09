@@ -1,7 +1,20 @@
 const mongoose = require("mongoose");
-const { isEmail } = require("validator");
+const { isEmail, isUppercase } = require("validator");
+const Blog = require("./Blog");
 const bcrypt = require("bcryptjs");
 const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    unique: true,
+    required: [true, "Please enter name"],
+    isUppercase: true,
+  },
+  avatar: {
+    type: String,
+  },
+  bio: {
+    type: String,
+  },
   email: {
     type: String,
     unique: true,
@@ -17,6 +30,24 @@ const userSchema = new mongoose.Schema({
   refreshToken: {
     type: String,
   },
+  blogs: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Blog",
+    },
+  ],
+  blogsSaved: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Blog",
+    },
+  ],
+  likes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Blog",
+    },
+  ],
 });
 
 // fire a func after doc saved to db

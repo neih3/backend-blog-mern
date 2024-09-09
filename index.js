@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const authRouter = require("./routes/authRoutes");
+const blogRouter = require("./routes/blogRoutes");
+const commentRouter = require("./routes/commentRoutes");
 const cookieParser = require("cookie-parser");
 
 var cors = require("cors");
@@ -35,6 +37,7 @@ mongoose
 // });
 
 app.use(authRouter);
-
+app.use("/v1/blog", blogRouter);
+app.use("/v1/comment", commentRouter);
 // VEaHNud75HKdjWbf
 //cgO7UQW3367rJr4N

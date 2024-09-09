@@ -2,43 +2,43 @@
  * Created by trungquandev.com's author on 16/10/2019.
  * src/controllers/auth.js
  */
-const jwtHelper = require("../helpers/jwt.helpers");
-const debug = console.log.bind(console);
-
-const accessTokenSecret = "hien";
+const { verifyToken } = require("../helpers/jwt.helpers");
+const User = require("../models/User");
 
 let isAuth = async (req, res, next) => {
-  // Lấy token được gửi lên từ phía client, thông thường tốt nhất là các bạn nên truyền token vào header
-  const tokenFromClient =
-    req.body.token || req.query.token || req.headers["x-access-token"];
+  try {
+    // Lấy token từ header Authorization
+    const token = req.headers.authorization.split(" ")[1]; // "Bearer <token>"
 
-  if (tokenFromClient) {
-    // Nếu tồn tại token
-    try {
-      // Thực hiện giải mã token xem có hợp lệ hay không?
-      const decoded = await jwtHelper.verifyToken(
-        tokenFromClient,
-        accessTokenSecret
-      );
-
-      // Nếu token hợp lệ, lưu thông tin giải mã được vào đối tượng req, dùng cho các xử lý ở phía sau.
-      req.jwtDecoded = decoded;
-
-      // Cho phép req đi tiếp sang controller.
-      next();
-    } catch (error) {
-      // Nếu giải mã gặp lỗi: Không đúng, hết hạn...etc:
-      // Lưu ý trong dự án thực tế hãy bỏ dòng debug bên dưới, mình để đây để debug lỗi cho các bạn xem thôi
-      debug("Error while verify token:", error);
-      return res.status(401).json({
-        message: "Unauthorized.",
-      });
+    if (!token) {
+      return res
+        .status(401)
+        .json({ message: "Authorization token is required" });
     }
-  } else {
-    // Không tìm thấy token trong request
-    return res.status(403).send({
-      message: "No token provided.",
-    });
+
+    // Giải mã token
+    const decoded = await verifyToken(token, "hien"); // 'hien' là secret key bạn đã sử dụng để tạo token
+
+    // Lấy email từ token
+    const userEmail = decoded.data.email;
+
+    // Tìm người dùng trong database
+    const user = await User.findOne({ email: userEmail });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Lưu thông tin người dùng vào request để sử dụng trong các route tiếp theo
+    req.user = user;
+
+    // Chuyển sang middleware hoặc route tiếp theo
+    next();
+  } catch (error) {
+    console.error("Auth error:", error.message);
+    return res
+      .status(401)
+      .json({ message: "Invalid or expired token", error: error.message });
   }
 };
 
