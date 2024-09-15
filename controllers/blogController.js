@@ -45,6 +45,11 @@ const blogController = {
         .populate({
           path: "comments",
           model: Comment,
+          populate: {
+            path: "user",
+            model: User,
+            select: "name avatar",
+          },
         });
       res.status(200).json(blog);
     } catch (err) {

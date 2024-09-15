@@ -20,19 +20,21 @@ const commentController = {
       res.status(500).json(err);
     }
   },
-  // //GET ALL Comment
-  // getAllComment: async (req, res) => {
-  //   try {
-  //     //   chú ý populate kiểu này
-  //     const comment = await Comment.findById(req.params.id).populate({
-  //       path: "blog",
-  //       model: Blog,
-  //     });
-  //     res.status(200).json(comment);
-  //   } catch (err) {
-  //     res.status(500).json(err);
-  //   }
-  // },
+  //GET ALL Comment
+  getAllCommentsByBlogId: async (req, res) => {
+    try {
+      // Giả định req.params.id là ID của blog mà bạn muốn tìm các comment thuộc về nó
+      console.log(req.params.id);
+
+      // Tìm tất cả các comment có blog ID tương ứng
+      const comments = await Comment.find({ blog: req.params.id });
+
+      res.status(200).json(comments);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ message: "Server error", error: err });
+    }
+  },
 
   //UPDATE Comment
   updateComment: async (req, res) => {

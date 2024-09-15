@@ -7,7 +7,7 @@ const router = Router();
 
 router.post("/", isAuth, commentController.addAComment);
 
-// router.get("/", blogController.getAllBlogs);
+router.get("/:id", isAuth, commentController.getAllCommentsByBlogId);
 
 // router.get("/:id", blogController.getABlog);
 
