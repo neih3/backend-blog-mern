@@ -8,6 +8,9 @@ router.get("/genres", blogController.getBlogsByGenre);
 
 router.post("/", blogController.addABlog);
 
+router.get("/bookmark", isAuth, blogController.getBookMarks);
+router.get("/search", blogController.searchBlogs);
+
 router.get("/", blogController.getAllBlogs);
 
 router.get("/:id", blogController.getABlog);

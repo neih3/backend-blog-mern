@@ -112,6 +112,36 @@ const blogController = {
       console.log(error);
     }
   },
+  getBookMarks: async (req, res) => {
+    const { _id } = req.user;
+    try {
+      const blog = await Blog.find({ userSavedBlogs: _id }).populate({
+        path: "user",
+        model: User,
+      });
+      res.status(200).json(blog);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  },
+  searchBlogs: async (req, res) => {
+    const { limit, q, page } = req.query;
+    try {
+      const blog = await Blog.find({
+        $text: { $search: q },
+      })
+        .populate({
+          path: "user",
+          model: User,
+        })
+        .skip((page - 1) * limit)
+        .limit(limit);
+
+      res.status(200).json(blog);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  },
 };
 
 module.exports = blogController;

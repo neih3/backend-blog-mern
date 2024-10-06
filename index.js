@@ -6,6 +6,7 @@ const commentRouter = require("./routes/commentRoutes");
 const cookieParser = require("cookie-parser");
 
 var cors = require("cors");
+const { errorHandler } = require("./controllers/errorController");
 const app = express();
 
 // middleware
@@ -39,5 +40,6 @@ mongoose
 app.use(authRouter);
 app.use("/v1/blog", blogRouter);
 app.use("/v1/comment", commentRouter);
+app.use(errorHandler);
 // VEaHNud75HKdjWbf
 //cgO7UQW3367rJr4N
