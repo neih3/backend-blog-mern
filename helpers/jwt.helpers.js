@@ -10,6 +10,7 @@ let generateToken = (user, secretSignature, tokenLife) => {
       email: user.email,
       role: user.role,
     };
+    console.log("user data ne", userData);
     // Thực hiện ký và tạo token
     jwt.sign(
       { data: userData },

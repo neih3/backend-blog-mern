@@ -21,7 +21,7 @@ let isAuth = async (req, res, next) => {
 
     const userEmail = decoded.data.email;
     const role = decoded.data.role;
-
+    console.log("role và userEmail", role, userEmail);
     // Tìm người dùng trong database
     const user = await User.findOne({ email: userEmail, role: role });
     console.log("user", user);

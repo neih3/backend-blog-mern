@@ -17,7 +17,7 @@ module.exports.refreshToken = async (req, res, next) => {
     // Verify the refresh token
     const decoded = await verifyToken(refreshTokenFromClient, "hien");
 
-    const { email } = decoded.data;
+    const { email, role } = decoded.data;
 
     // Find user with the refresh token
     const user = await User.findOne({
@@ -30,8 +30,8 @@ module.exports.refreshToken = async (req, res, next) => {
     }
 
     // Generate a new access token
-    const accessToken = await generateToken({ email }, "hien", "100s");
-
+    const accessToken = await generateToken({ email, role }, "hien", "100s");
+    console.log("đang cấp refresh");
     // Send the new access token
     res.status(200).json({ accessToken });
   } catch (error) {
@@ -194,7 +194,7 @@ module.exports.login_post = async (req, res) => {
     const accessToken = await generateToken(
       { email: user.email, role: user.role },
       "hien",
-      "1000s"
+      "10s"
     );
     const refreshToken = await generateToken(
       { email: user.email, role: user.role },
@@ -293,7 +293,7 @@ module.exports.toggleBlog = async (req, res) => {
   try {
     const user = req.user;
     const { _id } = req.body; // Blog ID from request body
-
+    console.log("user cần like", user);
     const userMongo = await User.findById(user._id);
     const blogMongo = await Blog.findById(_id);
     // Check if the blog is already saved
