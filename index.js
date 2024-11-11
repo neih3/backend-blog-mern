@@ -11,7 +11,14 @@ const { errorHandler } = require("./controllers/errorController");
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://your-frontend-domain.com"], // Thay bằng domain frontend của bạn
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true, // Cho phép gửi cookie qua CORS nếu cần
+  })
+);
+
 app.use(express.static("public"));
 app.use(express.json());
 app.use(cookieParser());
