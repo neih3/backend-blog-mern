@@ -1,19 +1,20 @@
 const { v4: uuidv4 } = require("uuid");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
+require("dotenv").config();
 
 const sendEmail = async (email, subject, text) => {
   try {
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      service: process.env.EMAIL_SERVICE,
       auth: {
-        user: "hiencastoo@gmail.com",
-        pass: "wlwv qfzx orta ohuv",
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
       },
     });
 
     await transporter.sendMail({
-      from: process.env.USER,
+      from: process.env.EMAIL_FROM,
       to: email,
       subject: subject,
       text: text,

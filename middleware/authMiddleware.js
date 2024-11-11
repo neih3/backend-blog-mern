@@ -4,7 +4,7 @@
  */
 const { verifyToken } = require("../helpers/jwt.helpers");
 const User = require("../models/User");
-
+require("dotenv").config();
 let isAuth = async (req, res, next) => {
   try {
     // Lấy token từ header Authorization
@@ -17,14 +17,14 @@ let isAuth = async (req, res, next) => {
     }
 
     // Giải mã token
-    const decoded = await verifyToken(token, "hien"); // 'hien' là secret key bạn đã sử dụng để tạo token
+    const decoded = await verifyToken(token, process.env.SECRET_JWT); // 'hien' là secret key bạn đã sử dụng để tạo token
 
     const userEmail = decoded.data.email;
     const role = decoded.data.role;
     console.log("role và userEmail", role, userEmail);
     // Tìm người dùng trong database
     const user = await User.findOne({ email: userEmail, role: role });
-    console.log("user", user);
+    // console.log("user", user);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
